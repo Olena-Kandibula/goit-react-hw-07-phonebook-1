@@ -4,41 +4,50 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   fetchContacts,
   removeContact,
-  addContact,
+  // addContact,
 } from '../../store/contactSlice';
+
+import { getContacts, getFilter } from '../../store/contactsSelectors';
 
 import s from '../ContactList/ContactList.module.css';
 import { TiUserDeleteOutline } from 'react-icons/ti';
 
 function ContactList() {
-  const contacts = useSelector(state => state.contacts.contacts);
-  const filter = useSelector(state => state.contacts.filter);
+  // const contacts = useSelector(state => state.contacts.contacts);
+  // const filter = useSelector(state => state.contacts.filter);
   const { status, error } = useSelector(state => state.contacts);
 
   const dispatch = useDispatch();
-  console.log('list contacts', contacts);
+  // console.log('list contacts', contacts);
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
+  // console.log('list getContacts', contactsGet);
 
   useEffect(() => {
     dispatch(fetchContacts());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  }, []);
 
-  // const normalizedFilter = filter.toLowerCase();
-  // const visibleContacts = contacts.filter(contact =>
-  //   contact.name.toLowerCase().includes(normalizedFilter),
-  // );
-  // // console.log('visibleContacts', visibleContacts);
-  const visibleContacts = contacts;
+  const normalizedFilter = filter.toLowerCase();
+  const visibleContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(normalizedFilter),
+  );
+  // console.log('visibleContacts', visibleContacts);
+  // const visibleContacts = contacts;
   console.log('list contacts', visibleContacts);
 
   return (
     <div>
       {status === 'loading' && <h2>Loading</h2>}
       {status === 'rejected' && <h2>Ups..{error}</h2>}
-
+      {/* {contacts.length > 0 &&( */}
       <ul className={s.list}>
         {/* {contacts && */}
-        {status === 'resolved' &&
+        {/* {status === 'resolved' && */}
+
+        {/* visibleContacts.map(contact => ( */}
+        {contacts.length > 0 &&
+          // contacts.map(contact => (
           visibleContacts.map(contact => (
             <li className={s.item} key={contact.id}>
               <p>

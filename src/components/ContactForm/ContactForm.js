@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { addContactAPI } from '../../store/contactSlice';
+import { addContact } from '../../store/contactSlice';
 
 import s from '../ContactForm/ContactForm.module.css';
 
@@ -50,7 +50,7 @@ function ContactForm() {
       }
     }
 
-    dispatch(addContactAPI(newContact));
+    dispatch(addContact(newContact));
     reset();
   };
 

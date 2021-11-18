@@ -4,13 +4,16 @@ const BASE_URL = 'https://618eb0d750e24d0017ce13d2.mockapi.io/api/contacts';
 
 export const fetchContacts = createAsyncThunk(
   'contacts/fetchContacts',
-  async function (_, { rejectWithValue }) {
+  async function (_, { rejectWithValue, dispatch }) {
     try {
       const response = await fetch(BASE_URL);
       if (!response.ok) {
         throw new Error('error server!');
       }
       const data = await response.json();
+
+      // dispatch(fetchContactsAll(data));
+
       return data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -32,50 +35,33 @@ export const removeContact = createAsyncThunk(
       dispatch(deleteContact(id));
       const data = await response.json();
       console.log('delete data', data);
+      return id;
     } catch (error) {
       return rejectWithValue(error.message);
     }
   },
 );
 
-export const addContactAPI = createAsyncThunk(
+export const addContact = createAsyncThunk(
   'contacts/addcontact',
   async function (contactNew, { rejectWithValue, dispatch }) {
-    // {name,phone,id}
-    console.log('contact slise', contactNew);
-    // console.log('contact=', JSON.stringify(contact));
     try {
-      // const contactNew = {
-      //     name: name,
-      //     phone: phone,
-      //     id:id,
-
-      // };
-      console.log(contactNew);
-
       const response = await fetch(BASE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(contactNew),
       });
-      // console.log('contact', contact)
-      console.log(' add response', response);
 
       if (!response.ok) {
         throw new Error("Can't add contact! Error Server!");
       }
+      // dispatch(addContact(data));
       const data = await response.json();
-      // const data = await response.then(res => res.json())
-      // dispatch(addContact(data))
-      // dispatch(addContact(contactNew))
-      // return data;
-      // return (dispatch) => {
-      //     dispatch(addContact(data))
-      // }
-      // return
-      dispatch(addContact(data));
-      // }
-      // console.log('add data',data )
+      // const data = await addContact(contactNew).then(res => res.json());
+      // console.log('add data', data)// получила новый контакт
+      dispatch(addContactNew(data));
+      // return [data, ...state.contacts];
+      return data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -120,9 +106,14 @@ const contactSlice = createSlice({
   },
 
   reducers: {
-    addContact(state, action) {
-      console.log(action.payload);
-      state.contacts.push(action.payload);
+    addContactNew(state, action) {
+      console.log('reduser action.payload', action.payload);
+      console.log('reduser addContact  state.contacts', state.contacts);
+      state.contacts = [action.payload, ...state.contacts];
+      // state.contacts.push(action.payload);
+      // state.contacts = action.payload;
+      console.log('reduser addContact  state.contacts', state.contacts);
+      // console.log('reduser push',  [action.payload, ...state.contacts]);
       //   state.contacts.concat(action.payload);
 
       //           state.contacts = [action.payload, ...state.contacts];
@@ -130,6 +121,7 @@ const contactSlice = createSlice({
 
     deleteContact(state, action) {
       state.contacts = state.contacts.filter(({ id }) => id !== action.payload);
+      console.log('reduser a deleteContac state.contacts', state.contacts);
     },
 
     changeFilter(state, action) {
@@ -141,20 +133,38 @@ const contactSlice = createSlice({
     [fetchContacts.pending]: setPending,
     [fetchContacts.fulfilled]: (state, action) => {
       state.status = 'resolved';
+      // console.log('super fetchContacts action.payload', action.payload)
+      // console.log('super fetchContacts state.contacts', state.contacts)
       state.contacts = action.payload;
-      state.error = null;
+      console.log('super fetchContacts state.contacts - 1 ', state.contacts);
+      // console.log('super fetchContacts state ', state)
+      // state.error = null;
+      //   return {
+      //   ...state,
+      //     contacts: action.payload
+      // }
     },
 
     [fetchContacts.rejected]: setError,
 
-    [addContactAPI.pending]: setPending,
-    [addContactAPI.fulfilled]: (state, action) => {
+    [addContact.pending]: setPending,
+    [addContact.fulfilled]: function (state, action) {
       state.status = 'resolved';
-      state.contacts = [action.payload, ...state.contacts];
-      //  state.contacts = action.payload;
+
+      console.log('super action.payload', action.payload);
+      // console.log('super state.contacts', state.contacts);
+      // state.contacts = action.payload;
+      //  state.contacts = state.contacts.push(action.payload);
+      // state.contacts = [...state.contacts, action.payload];
+      console.log('super state.contacts-add', state.contacts);
+
       state.error = null;
+      //  return {
+      //   ...state,
+      //   contacts:[...state.contacts, ...action.payload]
+      // }
     },
-    [addContactAPI.rejected]: setError,
+    [addContact.rejected]: setError,
 
     [removeContact.pending]: setPending,
     [removeContact.fulfilled]: state => {
@@ -163,11 +173,63 @@ const contactSlice = createSlice({
     },
     [removeContact.rejected]: setError,
   },
+
+  // extraReducers: (builder) => {
+  //   builder
+  //     .addCase(fetchContacts.pending, (state, action) => {
+  //     state.status = 'loading';
+  //     state.error = null;
+  //     })
+  //   .addCase(fetchContacts.fulfilled, (state, action) => {
+  //      state.status = 'resolved';
+  //     console.log('super fetchContacts action.payload', action.payload)
+  //     console.log('super fetchContacts state.contacts', state.contacts)
+  //     // state.contacts.push(action.payload);
+  //     state.contacts = action.payload;
+  //     console.log('super fetchContacts state.contacts - 1 ', state.contacts)
+  //     state.error = null;
+  //   })
+  //    .addCase(fetchContacts.rejected, (state,action)=>{
+  //       state.status = 'rejected';
+  // state.error = action.payload;
+  //    })
+
+  //         .addCase(addContact.pending, (state, action) => {
+  //     state.status = 'loading';
+  //     state.error = null;
+  //     })
+  //   .addCase(addContact.fulfilled, (state, action) => {
+  //      state.status = 'resolved';
+  //     console.log('super addContacts action.payload', action.payload)
+  //     console.log('super dddContacts state.contacts', state.contacts)
+  //     // state.contacts = action.payload;
+  //      state.contacts.push(action.payload);
+  //     console.log('super fetchContacts state.contacts - 1 ', state.contacts)
+  //     state.error = null;
+  //   })
+  //    .addCase(addContact.rejected, (state,action)=>{
+  //       state.status = 'rejected';
+  // state.error = action.payload;
+  //    })
+
+  //     .addCase(removeContact.pending, (state, action) => {
+  //     state.status = 'loading';
+  //     state.error = null;
+  //     })
+  //   .addCase(removeContact.fulfilled, (state, action) => {
+  //     state.status = 'resolved';
+  //       state.error = null;
+  //   })
+  //    .addCase(removeContact.rejected, (state,action)=>{
+  //       state.status = 'rejected';
+  // state.error = action.payload;
+  //    })
+  // }
 });
 
 export const {
-  // fetchContacts,
-  addContact,
+  // fetchContactsAll,
+  addContactNew,
   deleteContact,
   changeFilter,
 } = contactSlice.actions;
